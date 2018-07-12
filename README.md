@@ -13,7 +13,7 @@ Place your jpg-pics in the world!
 PicPlacer/src> npm install
 
 # Run the app
-PicPlacer> electron src
+PicPlacer> npm run src
 # Build the app
 PicPlacer> npm run dist
 ```
