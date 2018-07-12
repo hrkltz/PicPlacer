@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>PicPlacer</title>
+
+    <!-- Reference to the Lightning Design System -->
+    <link href="node_modules/@salesforce-ux/design-system/assets/styles/salesforce-lightning-design-system.min.css" rel="stylesheet" type="text/css">
+    
+    <!-- Reference to the Bing Maps SDK -->
+    <script type='text/javascript' src='https://www.bing.com/api/maps/mapcontrol?callback=LoadMap' async defer></script> <!-- ?callback=LoadMap will execute the LoadMap() function after mapcontrol is loaded -->
+  </head>
+
+  <body style="margin:0;">
+
+    <div class="slds-form-element" style="position: absolute; z-index:2; left:0; right:0; margin-left:auto; margin-right:auto; max-width:360px; margin-top:16px;">
+        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left" style="margin-left:16px; margin-right:16px;">
+          <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="node_modules/@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg#search"></use>
+          </svg>  
+          <input id="search" class="slds-input" type="text" placeholder="Panoramastraße 1A, 10178 Berlin"/>
+        </div>
+    </div>
+    
+    <div id="notification" class="slds-notify_container slds-hide" style="top:auto; bottom:0;">
+      <div class="slds-notify slds-notify_toast slds-theme_success" role="alert">
+        <span class="slds-assistive-text">success</span>
+        <span class="slds-icon_container slds-icon-utility-success slds-m-right_small slds-no-flex slds-align-top">
+          <svg class="slds-icon slds-icon_small" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="node_modules/@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg#success"></use>
+          </svg>
+        </span>
+        <div class="slds-notify__content">
+          <h2 id="notification-text" class="slds-text-heading_small "></h2>
+        </div>
+      </div>
+    </div>
+    
+    <div id="notificationError" class="slds-notify_container slds-hide" style="top:auto; bottom:0;">
+      <div class="slds-notify slds-notify_toast slds-theme_error" role="alert">
+        <span class="slds-assistive-text">error</span>
+        <span class="slds-icon_container slds-icon-utility-error slds-m-right_small slds-no-flex slds-align-top">
+          <svg class="slds-icon slds-icon_small" aria-hidden="true">
+            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="node_modules/@salesforce-ux/design-system/assets/icons/utility-sprite/svg/symbols.svg#warning"></use>
+          </svg>
+        </span>
+        <div class="slds-notify__content">
+          <h2 id="notificationError-text" class="slds-text-heading_small "></h2>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:absolute; z-index:2; bottom:0; padding:0 0 32px 16px;">
+      <button id="LAT" class="slds-button slds-button_brand" onclick="switchButton('LAT')">LAT</button>
+      <button id="LON" class="slds-button slds-button_brand" onclick="switchButton('LON')">LON</button>
+      <button id="ALT" class="slds-button slds-button_neutral" onclick="switchButton('ALT')">ALT</button>
+    </div>
+    <div id="mapView" style="position:absolute; z-index:1; width:100vw; height:100vh;"></div> <!-- main container for the map -->
+    <div id="loadingIndicator" class="demo-only demo--inverse" style="height: 6rem;">
+      <div class="slds-spinner_container">
+        <div role="status" class="slds-spinner slds-spinner_large">
+          <span class="slds-assistive-text">Loading</span>
+            <div class="slds-spinner__dot-a"></div>
+            <div class="slds-spinner__dot-b"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="offlineNotification" class="demo-only" style="height: 24rem;" hidden>
+      <section role="alertdialog" tabindex="-1" aria-labelledby="prompt-heading-id" aria-describedby="prompt-message-wrapper" class="slds-modal slds-fade-in-open slds-modal_prompt">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header slds-theme_error slds-theme_alert-texture">
+            <h2 class="slds-text-heading_medium" id="prompt-heading-id">Connection to Bing Maps failed</h2>
+          </header>
+          <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <p>Please check your internet connection and restart PicPlacer.</p>
+          </div>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+  </body>
+
+  <script>
+    /*
+     * LAT, LON and ALT button should act like a switch. 
+     * The button state will be simply change between on and off.
+     */
+    function switchButton(btnId) {
+        var btn = document.getElementById(btnId);
+        if(btn.classList.contains('slds-button_neutral')) {
+            btn.classList.remove('slds-button_neutral');
+            btn.classList.add('slds-button_brand');
+        } else if(btn.classList.contains('slds-button_brand')) {
+            btn.classList.remove('slds-button_brand');
+            btn.classList.add('slds-button_neutral');
+        }
+    }  
+
+    /* 
+     * This timout will be cleared when the requested mapcontrol library is received. (see LoadMap() function)
+     * Otherwise an offline notification will be shown.
+     */
+    var showOfflineNotification = setTimeout(() => { 
+      document.getElementById('offlineNotification').hidden = false;
+      document.getElementById('loadingIndicator').hidden = true;
+    }, 5000);
+
+    /*
+     * This function will be executed after the mapcontrol-library is successful received. 
+     */
+    function LoadMap(e) {
+      clearTimeout(showOfflineNotification);
+
+      document.getElementById('loadingIndicator').hidden = true;
+      
+      /* 
+       * Generate a new map element and set the TV tower as the center position:
+       * street: Panoramastraße 1A
+       * zip:    10178
+       * city:   Berlin
+       */
+      var map = new Microsoft.Maps.Map(document.getElementById('mapView'), { 
+        credentials: 'Get your own key: https://msdn.microsoft.com/en-us/library/ff428642.aspx?f=255&MSPPError=-2147217396',        
+        center: new Microsoft.Maps.Location(52.520815, 13.409419),
+        mapTypeId: Microsoft.Maps.MapTypeId.street,
+        zoom: 12,
+        showDashboard: false
+      });
+
+      // Add a pin to highlight the current selected position.
+      map.entities.push( new Microsoft.Maps.Pushpin(map.getCenter(), { color: '#1589EE', draggable: true })); 
+
+      // The user can move the pin to a new position by clicking the right mouse button.
+      Microsoft.Maps.Events.addHandler(map, 'rightclick', (args) => {
+        map.entities.get(0).setLocation(args.location);
+      });
+    }
+    
+    require('./renderer.js');
+  </script>
+</html>

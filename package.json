@@ -1,0 +1,34 @@
+{
+  "name": "picplacer",
+  "description": "Place your pics in the world!",
+  "homepage": "https://herrherklotz.github.io",
+  "author": {
+    "name": "Oliver Herklotz",
+    "email": "herrherklotz@gmail.com"
+  },
+  "scripts": {
+    "src": "electron src",
+    "asar": "electron asar/app.asar",
+    "pack": "asar pack src asar/app.asar",
+    "dist": "electron-builder --win --ia32"
+  },
+  "build": {
+    "productName": "PicPlacer",
+    "appId": "io.github.herrherklotz.picplacer",
+    "asar": true,
+    "compression": "normal",
+    "copyright": "Copyright @ 2018 HerrHerklotz",
+    "electronVersion": "2.0.4",
+    "directories": {
+      "output": "dist/",
+      "app": "src/"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "publisherName": "HerrHerklotz"
+    }
+  }
+}
