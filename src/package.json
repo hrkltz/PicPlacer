@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "main.js",
   "description": "Place your pics in the world!",
-  "homepage": "https://herrherklotz.github.io",
+  "homepage": "MyPage",
   "author": {
-    "name": "Oliver Herklotz",
-    "email": "herrherklotz@gmail.com"
+    "name": "MyName",
+    "email": "MyMail"
   },
   "devDependencies": {
     "bingmaps": "^2.0.3"
