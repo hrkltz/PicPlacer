@@ -82,6 +82,7 @@
     </div>
   </body>
 
+  <script type="text/javascript" src="key.js"></script>
   <script>
     /*
      * LAT, LON and ALT button should act like a switch. 
@@ -122,7 +123,7 @@
        * city:   Berlin
        */
       var map = new Microsoft.Maps.Map(document.getElementById('mapView'), { 
-        credentials: 'Get your own key: https://msdn.microsoft.com/en-us/library/ff428642.aspx?f=255&MSPPError=-2147217396',        
+        credentials: key,        
         center: new Microsoft.Maps.Location(52.520815, 13.409419),
         mapTypeId: Microsoft.Maps.MapTypeId.street,
         zoom: 12,
