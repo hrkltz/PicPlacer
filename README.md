@@ -10,7 +10,7 @@
 4. PicPlacer will now write the location into the corresponding EXIF fields.. finish!
 
 # How to build
-> To build this application you will also need [electron 2.0.4](https://www.npmjs.com/package/electron) and [electron-builder 20.20.4](https://www.npmjs.com/package/electron-builder).
+1. Get all dependencies
 ```shell
 # Clone this repository
 > git clone https://github.com/HerrHerklotz/PicPlacer
@@ -18,6 +18,7 @@
 > cd PicPlacer
 
 # Install dependencies
+PicPlacer> npm install
 PicPlacer/src> npm install
 
 # Run the app
@@ -25,3 +26,5 @@ PicPlacer> npm run src
 # Build the app
 PicPlacer> npm run dist
 ```
+2. Go to https://msdn.microsoft.com/en-us/library/ff428642.aspx?f=255&MSPPError=-2147217396 and get your private API key 
+3. Past your key into PicPlacer/src/key.js
